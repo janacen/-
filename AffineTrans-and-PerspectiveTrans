@@ -1,0 +1,48 @@
+#include<windows.h>
+#include <iostream>
+#include<opencv2/opencv.hpp>
+#include<opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+
+using namespace std;
+using namespace cv;
+
+Mat AffineTrans(Mat src, Point2f* scrPts, Point2f* dstPts)//仿射变换函数 
+{
+	Mat dst;
+	Mat Trans = getAffineTransform(scrPts, dstPts);
+	warpAffine(src, dst, Trans, Size(src.cols, src.rows), CV_INTER_CUBIC);
+	return dst;
+}
+
+Mat PerspectiveTrans(Mat src, Point2f* scrPts, Point2f* dstPts)//透视变换函数 
+{
+	Mat dst;
+	Mat Trans = getPerspectiveTransform(scrPts, dstPts);
+	warpPerspective(src, dst, Trans, Size(src.cols, src.rows), CV_INTER_CUBIC);
+	return dst;
+}
+
+int main()
+{
+	Mat I = imread("C:\\Users\\Administrator\\Pictures\\timg (3).jpg");  
+
+	Point2f srcPts[4] = { Point2f(100, 50), Point2f(100, 390), Point2f(600, 50), Point2f(600, 390) };
+	Point2f dstPts[4] = { Point2f(200, 100), Point2f(200, 330), Point2f(500, 50), Point2f(600, 390) };
+	Mat dst_affine = AffineTrans(I, srcPts, dstPts);
+	Mat dst_perspective = PerspectiveTrans(I, srcPts, dstPts);
+
+	for (int i = 0; i < 4; i++)
+	{
+		circle(I, srcPts[i], 2, Scalar(0, 0, 255), 2);
+		circle(dst_affine, dstPts[i], 2, Scalar(0, 0, 255), 2);
+		circle(dst_perspective, dstPts[i], 2, Scalar(0, 0, 255), 2);
+	}
+
+	imshow("origin", I);
+	imshow("affine", dst_affine);
+	imshow("perspective", dst_perspective);
+	waitKey();
+	return 0;
+}
